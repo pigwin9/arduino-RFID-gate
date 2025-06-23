@@ -1,13 +1,38 @@
 "use client";
+import { useState, useEffect } from "react";
 
-export default function DashboardPage() {
+function SSEClient() {
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const eventSource = new EventSource("http://127.0.0.1:8080/statusTick");
+
+    // Handle incoming messages
+    eventSource.onmessage = (event) => {
+      console.log("Received message:", event.data);
+      setMessage(event.data); // Update state with the new message
+    };
+
+    // Handle errors
+    eventSource.onerror = (err) => {
+      console.error("SSE error:", err);
+      setError("Connection failed");
+      eventSource.close();
+    };
+
+    // Cleanup on unmount
+    return () => {
+      eventSource.close();
+    };
+  }, []); // Empty dependency array means this runs once on mount
+
   return (
-    <div className="h-screen w-screen bg-[#F9FAFB] text-[#252c3b] flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
-      <p className="text-lg text-center max-w-xl">
-        Welcome to the dashboard! Here you can manage employee data, track attendance,
-        and view reports.
-      </p>
+    <div>
+      {error && <div className="error">{error}</div>}
+      <div>Last message: {message}</div>
     </div>
   );
 }
+
+export default SSEClient;

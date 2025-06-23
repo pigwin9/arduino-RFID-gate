@@ -27,24 +27,36 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://127.0.0.1:8080/getWorkersStatus");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data: Worker[] = await response.json();
-        setWorkers(data);
-        console.log(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8080/getWorkersStatus");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
+      const data: Worker[] = await response.json();
+      setWorkers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const eventSource = new EventSource("http://localhost:8080/statusTick");
+    // Handle incoming messages
+    eventSource.onmessage = (event) => {
+      fetchData();
+      console.log(event.data);
     };
 
-    fetchData();
+    // Handle errors
+    eventSource.onerror = (err) => {
+      console.error("SSE error:", err);
+      setError("Connection failed");
+      eventSource.close();
+    };
   }, []);
 
   if (loading) return <div>Loading...</div>;
