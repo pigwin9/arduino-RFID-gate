@@ -31,7 +31,8 @@ async function in_out(card){
     status = workerRow[0].status
   }
   else{
-    console.log("that card has no worker")
+    console.log("that card has no worker");
+    console.log(card)
     return 1
   }
 
