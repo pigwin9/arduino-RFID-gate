@@ -15,6 +15,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const workersPerPage = 17;
+  const totalPages = Math.ceil(workers.length / workersPerPage);
+  const indexOfLastWorker = currentPage * workersPerPage;
+  const indexOfFirstWorker = indexOfLastWorker - workersPerPage;
+  const currentWorkers = workers.slice(indexOfFirstWorker, indexOfLastWorker);
 
   const fetchData = async () => {
     try {
@@ -31,6 +38,11 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
+
+    const autoSlide = setInterval(() => {
+      setCurrentPage((prev) => (prev >= totalPages ? 1 : prev + 1));
+    }, 10000);
+
     const eventSource = new EventSource("http://localhost:8080/statusTick");
     eventSource.onmessage = () => fetchData();
     eventSource.onerror = (err) => {
@@ -38,70 +50,91 @@ export default function Home() {
       setError("Połączenie z serwerem zostało przerwane.");
       eventSource.close();
     };
-    return () => eventSource.close();
-  }, []);
+
+    return () => {
+      eventSource.close();
+      clearInterval(autoSlide);
+    };
+  }, [totalPages]);
+
+  const totalPresent = workers.filter((w) => w.status === 1).length;
 
   if (loading) return <div className="text-white p-4">Loading...</div>;
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   return (
-    <main className="min-h-screen p-6 bg-gradient-to-br from-gray-900 via-black to-gray-800 relative">
-      {/* przycisk logowania */}
-      <div className="flex justify-end mb-6">
-        <button
-          onClick={() => setShowLogin(true)}
-          className="bg-white text-black px-4 py-2 rounded shadow hover:bg-gray-200 transition"
-        >
-          Zaloguj
-        </button>
+    <main className="min-h-screen p-4 bg-[#f7f9fc]">
+      {/* Statystyki */}
+      <div className="flex gap-4 mb-4">
+        <div className="bg-white rounded-xl px-6 py-4 shadow flex items-center gap-2">
+          <span className="text-xl">👥</span>
+          <div>
+            <div className="text-xs text-gray-500">Łącznie</div>
+            <div className="text-lg font-bold">{workers.length}</div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl px-6 py-4 shadow flex items-center gap-2">
+          <span className="text-xl text-green-600">🟢</span>
+          <div>
+            <div className="text-xs text-gray-500">Obecni</div>
+            <div className="text-lg font-bold">{totalPresent}</div>
+          </div>
+        </div>
       </div>
 
-      {/* siatka kafelków */}
-      <div className="grid grid-cols-10 gap-3">
-        {workers.map((worker) => (
+      {/* Siatka kafelków */}
+      <div className="grid grid-cols-9 grid-rows-2 gap-4">
+        {currentWorkers.map((worker) => (
           <div
             key={worker.id}
-            className={`${
-              worker.status === 1
-                ? "bg-green-500 text-white"
-                : "bg-white text-black"
-            } border rounded-xl shadow-lg w-36 h-60 flex flex-col items-center justify-between p-3`}
+            className="bg-white text-black rounded-2xl shadow-md w-40 h-72 p-4 flex flex-col items-center justify-between"
           >
-            <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center">
-              {worker.photo ? (
-                <img
-                  src={worker.photo}
-                  alt={`${worker.name} ${worker.surname}`}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <div className="text-[10px] text-center text-gray-800 px-1">
-                  Proszę zgłosić się<br />do Lidera
-                </div>
-              )}
+            <div className="flex flex-col items-center">
+              <div className="bg-gray-200 rounded-full w-16 h-16 flex items-center justify-center text-xs text-gray-500 mb-2">
+                Brak <br /> zdjęcia
+              </div>
+              <div className="text-center font-semibold text-sm">
+                {worker.name} <br /> {worker.surname}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {worker.status === 1 ? "Obecny" : "Nieobecny"}
+              </div>
             </div>
-
-            <div className="text-[13px] text-center font-semibold leading-tight">
-              {worker.name} <br />
-              {worker.surname}
-            </div>
-
-            <div className="text-xs font-medium mt-1 flex items-center gap-1">
-              {worker.status === 1 ? (
-                <>
-                  <span className="text-lg">🟢</span> Obecny
-                </>
-              ) : (
-                <>
-                  <span className="text-lg">🔴</span> Nieobecny
-                </>
-              )}
+            <div className="text-2xl">
+              {worker.status === 1 ? "🟢" : "🔴"}
             </div>
           </div>
         ))}
       </div>
 
-      {/* okno logowania */}
+      {/* Paginacja */}
+      <div className="flex justify-center mt-6 gap-2">
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 rounded shadow text-sm font-medium ${
+              currentPage === i + 1
+                ? "bg-blue-500 text-white"
+                : "bg-white text-black"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+
+      {/* Przycisk logowania */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setShowLogin(true)}
+          className="flex items-center gap-2 bg-white px-4 py-2 rounded shadow hover:bg-gray-100"
+        >
+          <span className="text-lg">🔐</span> Zaloguj
+        </button>
+      </div>
+
+      {/* Okno logowania */}
       {showLogin && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-96 text-black">
@@ -139,4 +172,3 @@ export default function Home() {
     </main>
   );
 }
-
