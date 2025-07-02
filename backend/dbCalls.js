@@ -1,4 +1,6 @@
 const moment = require('moment');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const pool = require('./dbSetup');
 const EventEmitter = require('events');
 
@@ -13,6 +15,46 @@ async function createWorker(name, surname) {
   VALUES (?, ?)
   `, [name, surname])
 }
+
+//authentication related functions
+async function hashPassword(password) {
+    const hash = await bcrypt.hash(password, 13);
+    return hash;
+}
+
+async function createUser(worker, login, password, admin) {
+  //check if login exists
+  const [user] = await pool.query("SELECT id FROM users WHERE login ='" + login +"';");
+  if(user.length == 0){
+    //if dont, create new user
+    password = await hashPassword(password);
+    const [newUser] = await pool.query(
+            "INSERT INTO users (worker, login, password, admin) VALUES (?, ?, ?, ?)", 
+            [worker, login, password, admin]
+        );
+        return newUser;
+  }
+  else{
+    return 1
+    //already existing user logic
+  }
+}
+async function login(login, password) {
+  const [user] = await pool.query("SELECT * FROM users WHERE login = '" + login + "'");
+  const PasswordCheck = await bcrypt.compare (password, user[0].password);
+  if(PasswordCheck === true){
+    const token = jwt.sign({ id: user[0].id, username: user[0].username, admin: user[0].admin }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return token
+  }
+  else{
+    return 1
+  }
+}
+
+
+
+
+
 
 global.myEmitter = new EventEmitter();
 async function in_out(card){
@@ -71,4 +113,7 @@ module.exports = {
     getWorkersStatus,
     createWorker,
     in_out,
+    login,
+    hashPassword,
+    createUser
 };
