@@ -52,12 +52,13 @@ app.use((err, req, res, next) => {
 
 app.post("/login", async (req, res) => {
   const {login, password} = req.body;
-  const token = await dbCalls.login(login, password);
-  if(token === 1){
+  const user = await dbCalls.login(login, password);
+  console.log(user);
+  if(user.token === 1){
     res.status(401).send("invalid credentials")
   }
   else{
-    res.status(201).send({token: token});
+    res.status(201).send({token: user.token, name: user.user, admin: user.admin});
   }
 } )
 
@@ -87,7 +88,11 @@ function isAdmin(req, res) {
   }
 }
 
-app.get('/protected', authenticateToken, isAdmin, (req, res) => {
+app.get('/protected', authenticateToken,  (req, res) => {
+  res.sendStatus(200)
+});
+
+app.get('/adminProtected', authenticateToken, isAdmin, (req, res) => {
   res.sendStatus(200)
 });
 

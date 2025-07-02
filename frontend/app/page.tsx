@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface Worker {
   id: number;
@@ -17,9 +18,12 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  
-  const workersPerPage = 17;
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
+
+  const workersPerPage = 17;
+
   const totalPages = Math.ceil(workers.length / workersPerPage);
   const indexOfLastWorker = currentPage * workersPerPage;
   const indexOfFirstWorker = indexOfLastWorker - workersPerPage;
@@ -35,6 +39,32 @@ export default function Home() {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoginSubmit = async () => {
+    try {
+      const response = await axios.post("http://127.0.0.1:8080/login", {
+        login: login,
+        password: password,
+      });
+
+      const { token, name, admin } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("name", name);
+      localStorage.setItem("admin", admin);
+
+      if (admin === 1) {
+        router.push("/panel");
+      }
+
+      if (admin === 0) {
+        router.push("/panelpracownik");
+      }
+    } catch (err: any) {
+      console.log(err);
+      setError("Nieprawidłowe dane logowania");
     }
   };
 
@@ -102,9 +132,7 @@ export default function Home() {
                 {worker.status === 1 ? "Obecny" : "Nieobecny"}
               </div>
             </div>
-            <div className="text-2xl">
-              {worker.status === 1 ? "🟢" : "🔴"}
-            </div>
+            <div className="text-2xl">{worker.status === 1 ? "🟢" : "🔴"}</div>
           </div>
         ))}
       </div>
@@ -138,22 +166,18 @@ export default function Home() {
 
       {/* Okno logowania */}
       {showLogin && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/40 z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-96 text-black">
             <h2 className="text-xl font-bold mb-4 text-center">Logowanie</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                router.push("/panel");
-
-              }}
-            >
+            <form>
               <input
+                onChange={(e) => setLogin(e.target.value)}
                 type="text"
                 placeholder="Login"
                 className="w-full p-2 mb-3 border border-gray-300 rounded"
               />
               <input
+                onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 placeholder="Hasło"
                 className="w-full p-2 mb-4 border border-gray-300 rounded"
@@ -167,7 +191,8 @@ export default function Home() {
                   Anuluj
                 </button>
                 <button
-                  type="submit"
+                  onClick={handleLoginSubmit}
+                  type="button"
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
                   Zaloguj się

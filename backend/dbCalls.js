@@ -41,10 +41,14 @@ async function createUser(worker, login, password, admin) {
 }
 async function login(login, password) {
   const [user] = await pool.query("SELECT * FROM users WHERE login = '" + login + "'");
+  console.log(user)
   const PasswordCheck = await bcrypt.compare (password, user[0].password);
   if(PasswordCheck === true){
-    const token = jwt.sign({ id: user[0].id, username: user[0].username, admin: user[0].admin }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    return token
+    const token = jwt.sign({ id: user[0].id, username: user[0].login, admin: user[0].admin }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const admin = user[0].admin
+    const username = user[0].login
+    console.log(username);
+    return {token: token, user: username, admin: admin}
   }
   else{
     return 1

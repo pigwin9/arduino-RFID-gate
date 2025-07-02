@@ -2,9 +2,39 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function Panelpracownik() {
   const router = useRouter();
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("name");
+    localStorage.removeItem("admin");
+    router.push("/");
+  };
+
+  const checkAuth = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/");
+      return;
+    }
+    try {
+      await axios.get("http://127.0.0.1:8080/protected", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (err) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("name");
+      localStorage.removeItem("admin");
+      router.push("/");
+    }
+  };
+
+  checkAuth();
 
   return (
     <main className="min-h-screen bg-gray-100 p-8 text-black">
@@ -18,49 +48,45 @@ export default function Panelpracownik() {
           </div>
           <button
             className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-950 transition cursor-pointer"
-            onClick={() => router.push("/")}
+            onClick={logout}
           >
             Wyloguj
           </button>
         </div>
 
         <div className="flex gap-4 flex-wrap">
-          
           <div className="w-full h-1 bg-gray-300"></div>
 
-         <p className="text-2xl font-bold w-full">🗓 Historia odbić</p>
+          <p className="text-2xl font-bold w-full">🗓 Historia odbić</p>
 
           <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
             <div className="text-xs text-gray-500">2 dni temu</div>
             <div className="text-lg font-bold">📆 01.07.2025</div>
             <div className="text-lg font-bold">⌛4h 36min</div>
           </div>
-           <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
+          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
             <div className="text-xs text-gray-500">2 dni temu</div>
             <div className="text-lg font-bold">📆 01.07.2025</div>
             <div className="text-lg font-bold">⌛4h 36min</div>
           </div>
 
- <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
+          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
             <div className="text-xs text-gray-500">2 dni temu</div>
             <div className="text-lg font-bold">📆 01.07.2025</div>
             <div className="text-lg font-bold">⌛4h 36min</div>
           </div>
 
- <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
+          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
             <div className="text-xs text-gray-500">2 dni temu</div>
             <div className="text-lg font-bold">📆 01.07.2025</div>
             <div className="text-lg font-bold">⌛4h 36min</div>
           </div>
 
- <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
+          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
             <div className="text-xs text-gray-500">2 dni temu</div>
             <div className="text-lg font-bold">📆 01.07.2025</div>
             <div className="text-lg font-bold">⌛4h 36min</div>
           </div>
-
-
-
 
           <div className="w-full h-1 bg-gray-300"></div>
         </div>
