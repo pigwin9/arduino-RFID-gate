@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Worker {
   id: number;
@@ -16,8 +17,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
+  
   const workersPerPage = 17;
+  const router = useRouter();
   const totalPages = Math.ceil(workers.length / workersPerPage);
   const indexOfLastWorker = currentPage * workersPerPage;
   const indexOfFirstWorker = indexOfLastWorker - workersPerPage;
@@ -125,12 +127,12 @@ export default function Home() {
       </div>
 
       {/* Przycisk logowania */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4  z-50">
         <button
           onClick={() => setShowLogin(true)}
-          className="flex items-center gap-2 bg-white px-4 py-2 rounded shadow hover:bg-gray-100"
+          className="flex items-center gap-2 bg-violet-800 px-4 py-2 rounded shadow hover:bg-violet-950 duration-100"
         >
-          <span className="text-lg">🔐</span> Zaloguj
+          <span className="text-lg ">🔐</span> Zaloguj
         </button>
       </div>
 
@@ -139,7 +141,13 @@ export default function Home() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-96 text-black">
             <h2 className="text-xl font-bold mb-4 text-center">Logowanie</h2>
-            <form>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                router.push("/panel");
+
+              }}
+            >
               <input
                 type="text"
                 placeholder="Login"
