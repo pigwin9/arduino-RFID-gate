@@ -50,7 +50,7 @@ export default function Home() {
       });
 
       const { token, name, admin } = response.data;
-
+      console.log("TOKEN:", token); 
       localStorage.setItem("token", token);
       localStorage.setItem("name", name);
       localStorage.setItem("admin", admin);

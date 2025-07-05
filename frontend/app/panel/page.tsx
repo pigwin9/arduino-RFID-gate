@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Panel() {
@@ -34,7 +34,10 @@ export default function Panel() {
     router.push("/");
   };
 
-  checkAuth();
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
 
   return (
     <main className="min-h-screen bg-gray-100 p-8 text-black">
