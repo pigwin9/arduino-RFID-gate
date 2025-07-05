@@ -111,7 +111,10 @@ export default function Panel() {
               <span className="text-xl">👤</span> Jakub Sinkiewicz
             </div>
             <div>
-              <button className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition">
+              <button
+                onClick={() => router.push("/panel/odbicia")}
+                className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition"
+              >
                 Zarządzaj odbiciami
               </button>
               <button className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 cursor-pointer transition">
@@ -125,7 +128,10 @@ export default function Panel() {
               <span className="text-xl">👤</span> Maciej Sobiś
             </div>
             <div>
-              <button className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition">
+             <button
+                onClick={() => router.push("/panel/odbicia")}
+                className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition"
+              >
                 Zarządzaj odbiciami
               </button>
               <button className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 cursor-pointer transition">
