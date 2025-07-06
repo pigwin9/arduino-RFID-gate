@@ -42,6 +42,20 @@ export default function Home() {
     }
   };
 
+  const checkAuth = async () => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("name");
+      localStorage.removeItem("admin");
+      localStorage.removeItem("id");
+      return;
+    }
+  };
+
+  checkAuth();
+
   const handleLoginSubmit = async () => {
     try {
       const response = await axios.post("http://127.0.0.1:8080/login", {
@@ -49,11 +63,12 @@ export default function Home() {
         password: password,
       });
 
-      const { token, name, admin } = response.data;
-      console.log("TOKEN:", token); 
+      const { token, name, admin, id } = response.data;
+
       localStorage.setItem("token", token);
       localStorage.setItem("name", name);
       localStorage.setItem("admin", admin);
+      localStorage.setItem("id", id);
 
       if (admin === 1) {
         router.push("/panel");

@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Panel() {
@@ -23,6 +23,7 @@ export default function Panel() {
       localStorage.removeItem("token");
       localStorage.removeItem("name");
       localStorage.removeItem("admin");
+      localStorage.removeItem("id");
       router.push("/");
     }
   };
@@ -31,13 +32,26 @@ export default function Panel() {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
     localStorage.removeItem("admin");
+    localStorage.removeItem("id");
     router.push("/");
   };
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+  checkAuth();
 
+  interface Worker {
+    id: number;
+    name: string;
+    surname: string;
+  }
+
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const fetchData = async () => {
+    const response = await axios.get("http://127.0.0.1:8080/getWorkers");
+    setWorkers(response.data);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-100 p-8 text-black">
@@ -89,56 +103,25 @@ export default function Panel() {
           <div className="w-full h-1 bg-gray-300"></div>
 
           <p className="text-2xl font-bold w-full">📋Lista pracowników</p>
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div>
-              <span className="text-xl">👤</span> Kacper Tąpolski
+          {workers.map((worker) => (
+            <div
+              key={worker.id}
+              className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full"
+            >
+              <div>
+                <span className="text-xl">👤</span>{" "}
+                {worker.name + " " + worker.surname}
+              </div>
+              <div>
+                <button className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition">
+                  Zarządzaj odbiciami
+                </button>
+                <button className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 cursor-pointer transition">
+                  Usuń pracownika
+                </button>
+              </div>
             </div>
-            <div>
-              <button
-                onClick={() => router.push("/panel/odbicia")}
-                className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition"
-              >
-                Zarządzaj odbiciami
-              </button>
-              <button className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 cursor-pointer transition">
-                Usuń pracownika
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div>
-              <span className="text-xl">👤</span> Jakub Sinkiewicz
-            </div>
-            <div>
-              <button
-                onClick={() => router.push("/panel/odbicia")}
-                className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition"
-              >
-                Zarządzaj odbiciami
-              </button>
-              <button className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 cursor-pointer transition">
-                Usuń pracownika
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div>
-              <span className="text-xl">👤</span> Maciej Sobiś
-            </div>
-            <div>
-             <button
-                onClick={() => router.push("/panel/odbicia")}
-                className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500 mr-1 cursor-pointer transition"
-              >
-                Zarządzaj odbiciami
-              </button>
-              <button className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 cursor-pointer transition">
-                Usuń pracownika
-              </button>
-            </div>
-          </div>
+          ))}
 
           <div className="w-full h-1 bg-gray-300"></div>
         </div>

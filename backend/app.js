@@ -12,7 +12,7 @@ const myEmitter = new EventEmitter();
 app.use(cors());
 app.use(express.json());
 
-const JWT_SECRET = process.env.JWT_SECRET || "tajnehaslo";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Strona główna
 app.get('/', (req, res) => {
@@ -26,10 +26,27 @@ app.get('/getWorkersStatus', async (req, res) => {
   res.send(workers);
 });
 
+app.get('/getWorkers', async (req, res) => {
+  const workers = await dbCalls.getWorkers();
+  res.send(workers);
+});
+
+app.get('/getWorkerTimes/:id', async (req, res) => {
+  const workerId = req.params.id
+  const times = await dbCalls.getWorkerTimes(workerId);
+  res.status(201).send(times)
+});
+
 app.post("/createWorker", async (req, res) => {
   const { name, surname } = req.body;
   const worker = await dbCalls.createWorker(name, surname);
   res.status(201).send(worker);
+});
+
+app.delete("/deleteWorker", async (req, res) => {
+ const { id } = req.body;
+ const deleted = await dbCalls.deleteWorker(id);
+res.status(201).send(deleted);
 });
 
 app.post("/createUser", async (req, res) => {
@@ -48,32 +65,25 @@ app.post("/createPassword", async (req, res) => {
   res.status(201).send(hashPassword);
 });
 
-// 🔐 Login z generowaniem JWT
 app.post("/login", async (req, res) => {
   const { login, password } = req.body;
   const user = await dbCalls.login(login, password);
 
-  if (!user || user.token === 1) {
+  
+
+  if (user === 1) {
     return res.status(401).send("Invalid credentials");
   }
-
-  const token = jwt.sign(
-    {
-      id: user.id,
-      admin: user.admin,
-    },
-    JWT_SECRET,
-    { expiresIn: "1h" }
-  );
+  console.log(user)
 
   res.status(200).send({
-    token,
+    token: user.token,
     name: user.user,
     admin: user.admin,
+    id: user.id
   });
 });
 
-// 🛡 Middleware do autoryzacji
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -90,7 +100,6 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// 🛡 Middleware: tylko admin
 function isAdmin(req, res, next) {
   const { admin } = req.user || {};
   if (admin === 1) {
@@ -100,7 +109,6 @@ function isAdmin(req, res, next) {
   }
 }
 
-// 🔐 Chronione endpointy
 app.get('/protected', authenticateToken, (req, res) => {
   res.sendStatus(200);
 });

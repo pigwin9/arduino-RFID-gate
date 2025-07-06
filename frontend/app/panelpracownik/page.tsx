@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -10,6 +10,7 @@ export default function Panelpracownik() {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
     localStorage.removeItem("admin");
+    localStorage.removeItem("id");
     router.push("/");
   };
 
@@ -30,12 +31,31 @@ export default function Panelpracownik() {
       localStorage.removeItem("token");
       localStorage.removeItem("name");
       localStorage.removeItem("admin");
+      localStorage.removeItem("id");
       router.push("/");
     }
   };
 
   checkAuth();
 
+  interface Time {
+    id: number;
+    inTime: string;
+    outTime: string;
+    date: string;
+    workingTime: string;
+  }
+
+  const [times, setTimes] = useState<Time[]>([]);
+  const fetchData = async (id) => {
+    const response = await axios.get(
+      "http://127.0.0.1:8080/getWorkerTimes/" + id.toString()
+    );
+    setTimes(response.data);
+  };
+  useEffect(() => {
+    fetchData(localStorage.id);
+  }, []);
   return (
     <main className="min-h-screen bg-gray-100 p-8 text-black">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6">
@@ -58,39 +78,23 @@ export default function Panelpracownik() {
           <div className="w-full h-1 bg-gray-300"></div>
 
           <p className="text-2xl font-bold w-full">🗓 Historia odbić</p>
-
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div className="text-xs text-gray-500">2 dni temu</div>
-            <div className="text-lg font-bold">📆 01.07.2025</div>
-            <div className="text-lg font-bold">⌛4h 36min</div>
-          </div>
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div className="text-xs text-gray-500">2 dni temu</div>
-            <div className="text-lg font-bold">📆 01.07.2025</div>
-            <div className="text-lg font-bold">⌛4h 36min</div>
-          </div>
-
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div className="text-xs text-gray-500">2 dni temu</div>
-            <div className="text-lg font-bold">📆 01.07.2025</div>
-            <div className="text-lg font-bold">⌛4h 36min</div>
-          </div>
-
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div className="text-xs text-gray-500">2 dni temu</div>
-            <div className="text-lg font-bold">📆 01.07.2025</div>
-            <div className="text-lg font-bold">⌛4h 36min</div>
-          </div>
-
-          <div className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full">
-            <div className="text-xs text-gray-500">2 dni temu</div>
-            <div className="text-lg font-bold">📆 01.07.2025</div>
-            <div className="text-lg font-bold">⌛4h 36min</div>
-          </div>
+          {times.map((time) => (
+            <div
+              key={time.id}
+              className="bg-white rounded-xl px-6 py-4 shadow flex justify-between items-center gap-2 w-full"
+            >
+              <div className="text-lg font-bold">📆 {time.date}</div>
+              <div className="text-lg font-bold">
+                {time.inTime + " - " + time.outTime}
+              </div>
+              <div className="text-lg font-bold">⌛ {time.workingTime}</div>
+            </div>
+          ))}
 
           <div className="w-full h-1 bg-gray-300"></div>
         </div>
       </div>
     </main>
   );
+  [];
 }
