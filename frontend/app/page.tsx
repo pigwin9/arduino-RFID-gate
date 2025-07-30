@@ -54,9 +54,8 @@ export default function Home() {
     }
   };
 
-  checkAuth();
-
-  const handleLoginSubmit = async () => {
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
     try {
       const response = await axios.post("http://127.0.0.1:8080/login", {
         login: login,
@@ -84,27 +83,23 @@ export default function Home() {
   };
 
   useEffect(() => {
+    checkAuth();
     fetchData();
 
-    const autoSlide = setInterval(() => {
-      setCurrentPage((prev) => (prev >= totalPages ? 1 : prev + 1));
-    }, 10000);
-
     const eventSource = new EventSource("http://localhost:8080/statusTick");
-    eventSource.onmessage = () => fetchData();
+    eventSource.onmessage = () => {
+      fetchData();
+    };
     eventSource.onerror = (err) => {
       console.error("SSE error:", err);
       setError("Połączenie z serwerem zostało przerwane.");
       eventSource.close();
     };
-
-    return () => {
-      eventSource.close();
-      clearInterval(autoSlide);
-    };
-  }, [totalPages]);
+  }, []);
 
   const totalPresent = workers.filter((w) => w.status === 1).length;
+  console.log(workers.filter((w) => w.status === 1));
+  console.log(workers.filter((w) => w.status === 0));
 
   if (loading) return <div className="text-white p-4">Loading...</div>;
   if (error) return <div className="text-red-500 p-4">{error}</div>;
@@ -184,7 +179,7 @@ export default function Home() {
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/40 z-50">
           <div className="bg-white rounded-lg p-6 shadow-lg w-96 text-black">
             <h2 className="text-xl font-bold mb-4 text-center">Logowanie</h2>
-            <form>
+            <form onSubmit={handleLoginSubmit}>
               <input
                 onChange={(e) => setLogin(e.target.value)}
                 type="text"
@@ -207,7 +202,7 @@ export default function Home() {
                 </button>
                 <button
                   onClick={handleLoginSubmit}
-                  type="button"
+                  type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
                   Zaloguj się

@@ -5,8 +5,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = process.env.PORT || 8080;
 const cors = require('cors');
-const EventEmitter = require('events');
-const myEmitter = new EventEmitter();
+const myEmitter = require('./emitter');
 
 
 app.use(cors());
@@ -126,17 +125,25 @@ app.get('/statusTick', (req, res) => {
     'X-Accel-Buffering': 'no',
   });
 
-  res.write(`data: Connected to server\n\n`);
+  const refreshListener = () => {
+    // Check if the connection is still open before writing
+    if (!res.writableEnded) {
+      res.write(`data: refresh\n\n`);
+      console.log('Event received! Sending update to client.');
+    }
+  };
 
-  myEmitter.on('refreshStatusPage', () => {
-    res.write(`data: refresh\n\n`);
-  });
+  // 2. Add the listener using that variable.
+  myEmitter.on('refreshStatusPage', refreshListener);
+  console.log("+++ Client connected. 'refreshStatusPage' listener added.");
 
+  // 3. When the connection closes, remove the listener using the SAME variable.
   req.on('close', () => {
+    myEmitter.removeListener('refreshStatusPage', refreshListener);
     res.end();
+    console.log("--- Client disconnected. Listener removed to prevent memory leak.");
   });
 });
-
 // Obsługa błędów
 app.use((err, req, res, next) => {
   console.error(err.stack);

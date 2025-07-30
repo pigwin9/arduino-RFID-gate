@@ -2,7 +2,7 @@ const moment = require('moment');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('./dbSetup');
-const EventEmitter = require('events');
+const myEmitter = require('./emitter');
 const { format } = require('path');
 
 async function getWorkersStatus() {
@@ -111,12 +111,10 @@ async function getWorkerTimes(id){
 }
 
 
-global.myEmitter = new EventEmitter();
 async function in_out(card){
   //get time and date
   const currentTime = moment().format('HH:mm:ss');
   const currentDate = moment().format('YYYY-MM-DD');
-
 
 
   //get worker id and status

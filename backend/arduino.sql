@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Cze 24, 2025 at 06:06 PM
+-- Generation Time: Lip 06, 2025 at 04:38 AM
 -- Wersja serwera: 10.4.32-MariaDB
 -- Wersja PHP: 8.2.12
 
@@ -31,7 +31,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `worker` int(11) NOT NULL,
   `login` varchar(20) NOT NULL,
-  `password` varchar(50) NOT NULL,
+  `password` varchar(60) NOT NULL,
   `admin` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -40,7 +40,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `worker`, `login`, `password`, `admin`) VALUES
-(5, 4, 'jano', 'asdw', 1);
+(5, 4, 'jano', 'asdw', 1),
+(8, 7, 'janoa', '$2b$13$uuv2zrYSh8K/kdFtJkFfBe0M51GAt.n.1.EAysetwMFP8C70KkgXG', 1),
+(9, 6, 'kacper', 'aaaaa', 0),
+(10, 6, 'ziomek', '$2b$13$VkZow59U6PX3A3GMoTtIn.J7AhkZtucC0QgARtLtPIGjEl2dTzZya', 0),
+(11, 4, 'test', '$2b$13$kry/sHLSGGdJSbRmz0uPP.H/ZKNzyGOS/z6wgVhSgWEOE2CjevTLe', 0),
+(12, 6, 'test2', '$2b$13$Ph1d0WKqMszLIroEPC.QlOtAihbQxSEVfS1lddkLxineItym6/bMS', 0);
 
 -- --------------------------------------------------------
 
@@ -63,7 +68,7 @@ CREATE TABLE `workers` (
 INSERT INTO `workers` (`id`, `name`, `surname`, `card`, `status`) VALUES
 (4, 'janek', 'piskwa', ' 29 A4 D7 C2', 0),
 (5, 'kacper', 'topolski', ' 7A 07 71 C1', 1),
-(6, 'siema', 'eniu', ' 4A 4E 0C C1', 0),
+(6, 'siema', 'eniu', ' 4A 4E 0C C1', 1),
 (7, 'ivan', 'malutki', ' 6A 88 4F C1', 0);
 
 -- --------------------------------------------------------
@@ -156,12 +161,16 @@ INSERT INTO `working_time` (`id`, `worker`, `time_in`, `time_out`, `date`) VALUE
 (77, 4, '23:11:22', '23:11:35', '2025-06-23'),
 (78, 4, '23:11:24', '23:11:35', '2025-06-23'),
 (79, 4, '23:11:26', '23:11:35', '2025-06-23'),
-(80, 4, '23:11:30', '23:11:35', '2025-06-23'),
+(80, 4, '23:11:30', '23:15:35', '2025-06-23'),
 (81, 4, '23:11:34', '23:11:35', '2025-06-23'),
 (82, 7, '11:44:34', '11:45:52', '2025-06-24'),
 (83, 6, '11:44:38', '11:45:52', '2025-06-24'),
 (84, 4, '11:45:07', '11:45:52', '2025-06-24'),
-(85, 5, '11:45:53', '00:00:00', '2025-06-24');
+(85, 5, '11:45:53', '00:00:00', '2025-06-24'),
+(86, 6, '19:28:52', '19:28:55', '2025-06-26'),
+(87, 6, '19:28:53', '19:28:55', '2025-06-26'),
+(88, 6, '19:28:55', '19:28:55', '2025-06-26'),
+(89, 6, '21:25:30', '00:00:00', '2025-06-26');
 
 --
 -- Indeksy dla zrzutów tabel
@@ -195,19 +204,19 @@ ALTER TABLE `working_time`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `working_time`
 --
 ALTER TABLE `working_time`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- Constraints for dumped tables
